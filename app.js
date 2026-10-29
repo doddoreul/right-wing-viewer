@@ -137,11 +137,15 @@ function makeRenderer(platformKey) {
         url.className = 'url';
         url.textContent = entry.url;
 
-        const marker = document.createElement('span');
+        const marker = document.createElement('button');
+        marker.type = 'button';
         marker.className = 'mark ' + (done ? 'done' : 'pending');
         marker.textContent = done ? '\u2713' : '\u25CB';
         marker.title = done ? 'Visitée' : 'Pas encore visitée';
         marker.setAttribute('aria-label', marker.title);
+
+        marker.tabIndex = 0;
+        marker.setAttribute('role', 'button');
 
         marker.addEventListener('click', (event) => {
           event.preventDefault();
@@ -188,11 +192,20 @@ function makeRenderer(platformKey) {
         list.appendChild(item);
       }
 
+      heading.tabIndex = 0;
+      heading.setAttribute('role', 'button');
+
       let collapsed = false;
       heading.addEventListener('click', () => {
         collapsed = !collapsed;
         list.style.display = collapsed ? 'none' : '';
         indicator.textContent = collapsed ? '\u25B8' : '\u25BE';
+      });
+
+      heading.addEventListener('keydown', (event) => {
+        if (event.key !== 'Enter' && event.key !== ' ') return;
+        event.preventDefault();
+        heading.click();
       });
 
       section.appendChild(list);
@@ -241,6 +254,9 @@ function setupDraw() {
 
   if (!card) return;
 
+  card.tabIndex = 0;
+  card.setAttribute('role', 'button');
+
   const drawRandom = () => {
     const candidates = allUnvisitedEntries();
     if (!candidates.length) {
@@ -273,6 +289,12 @@ function setupDraw() {
     if (!drawn) return;
     drawn.markVisited();
     window.open(drawn.entry.url, '_blank', 'noopener');
+  });
+
+  card.addEventListener('keydown', (event) => {
+    if (event.key !== 'Enter' && event.key !== ' ') return;
+    event.preventDefault();
+    card.click();
   });
 
   if (visitButton) {
