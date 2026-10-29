@@ -85,7 +85,6 @@ function makeRenderer(platformKey) {
   const groups = platform.groups;
   const container = document.getElementById(platform.container);
   const platformState = state[platformKey];
-  const groupPending = {};
 
   return function render() {
     if (platformKey !== current) return;
@@ -95,7 +94,7 @@ function makeRenderer(platformKey) {
 
     for (const group of groups) {
       const groupEntries = entries.filter((entry) => entry.group === group);
-      const groupIsPending = platformState.onlyPending || !!groupPending[group];
+      const groupIsPending = platformState.onlyPending;
       const visibleEntries = groupIsPending
         ? groupEntries.filter((entry) => !platformState.visited.has(entry.url))
         : groupEntries;
@@ -112,18 +111,7 @@ function makeRenderer(platformKey) {
       const visitedInGroup = groupEntries.filter((entry) => platformState.visited.has(entry.url)).length;
       title.textContent = `${group}: ${visitedInGroup}/${groupEntries.length}`;
 
-      const filterButton = document.createElement('button');
-      filterButton.type = 'button';
-      filterButton.textContent = groupIsPending ? 'Toutes' : 'Non visit\u00e9es';
-      filterButton.style.fontSize = '.8rem';
-      filterButton.style.padding = '2px 8px';
-      filterButton.addEventListener('click', (event) => {
-        event.stopPropagation();
-        groupPending[group] = !groupPending[group];
-        render();
-      });
-
-      heading.append(indicator, title, filterButton);
+      heading.append(indicator, title);
       section.appendChild(heading);
 
       const list = document.createElement('ol');
