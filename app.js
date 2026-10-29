@@ -12,7 +12,6 @@ const TAB_LABELS = {
 
 let current = null;
 const state = {};
-let lastOpened = null;
 let drawn = null;
 let PLATFORMS = null;
 const renderers = {};
@@ -169,27 +168,20 @@ function makeRenderer(platformKey) {
           updateCount(platformKey, shown);
         });
 
-        link.addEventListener('click', (event) => {
-          event.preventDefault();
+        link.addEventListener('click', () => {
+          platformState.visited.add(entry.url);
+          saveVisited(platform.key, platformState.visited);
 
-          const markVisited = () => {
-            platformState.visited.add(entry.url);
-            saveVisited(platform.key, platformState.visited);
+          item.classList.add('visited');
+          marker.className = 'mark done';
+          marker.textContent = '\u2713';
+          marker.title = 'Visit\u00e9e';
+          marker.setAttribute('aria-label', 'Visit\u00e9e');
 
-            item.classList.add('visited');
-            marker.className = 'mark done';
-            marker.textContent = '\u2713';
-            marker.title = 'Visit\u00e9e';
-            marker.setAttribute('aria-label', 'Visit\u00e9e');
+          const visitedAfter = groupEntries.filter((e) => platformState.visited.has(e.url)).length;
+          title.textContent = `${group}: ${visitedAfter}/${groupEntries.length}`;
 
-            const visitedAfter = groupEntries.filter((e) => platformState.visited.has(e.url)).length;
-            title.textContent = `${group}: ${visitedAfter}/${groupEntries.length}`;
-
-            updateCount(platformKey, shown);
-          };
-
-          lastOpened = { entry: entry, markVisited: markVisited };
-          window.open(entry.url, '_blank', 'noopener');
+          updateCount(platformKey, shown);
         });
 
         item.append(link, url, marker);
@@ -225,47 +217,6 @@ function updateCount(platformKey, shown) {
     (platformState.onlyPending ? ` \u2014 ${shown} non visitées affichées` : '');
 }
 
-function showBlockModal(entry, onConfirm) {
-  const modal = document.getElementById('modal');
-  const titleElement = document.getElementById('modal-title');
-  const urlElement = document.getElementById('modal-url');
-  const confirmButton = document.getElementById('modal-confirm');
-  const cancelButton = document.getElementById('modal-cancel');
-
-  titleElement.textContent = entry.name;
-  urlElement.textContent = entry.url;
-  modal.classList.add('active');
-
-  const close = () => modal.classList.remove('active');
-
-  const handleConfirm = () => {
-    close();
-    cleanup();
-    if (onConfirm) onConfirm();
-  };
-
-  const handleCancel = () => {
-    close();
-    cleanup();
-  };
-
-  const handleBackdrop = (event) => {
-    if (event.target === modal) {
-      close();
-      cleanup();
-    }
-  };
-
-  function cleanup() {
-    confirmButton.removeEventListener('click', handleConfirm);
-    cancelButton.removeEventListener('click', handleCancel);
-    modal.removeEventListener('click', handleBackdrop);
-  }
-
-  confirmButton.addEventListener('click', handleConfirm);
-  cancelButton.addEventListener('click', handleCancel);
-  modal.addEventListener('click', handleBackdrop);
-}
 
 function allUnvisitedEntries() {
   const result = [];
@@ -321,7 +272,7 @@ function setupDraw() {
 
   card.addEventListener('click', () => {
     if (!drawn) return;
-    lastOpened = { entry: drawn.entry, markVisited: drawn.markVisited };
+    drawn.markVisited();
     window.open(drawn.entry.url, '_blank', 'noopener');
   });
 
@@ -403,15 +354,6 @@ async function init() {
     renderCurrent();
 
     setupDraw();
-
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState !== 'visible' || !lastOpened) return;
-      const opened = lastOpened;
-      lastOpened = null;
-      showBlockModal(opened.entry, () => {
-        opened.markVisited();
-      });
-    });
   } catch (error) {
     document.getElementById('panels').innerHTML =
       '<p class="error">Impossible de charger pages.json : ' + error.message +
