@@ -55,7 +55,7 @@ function normalizeEntry(entry) {
 
 function buildPlatforms(pages) {
   const platforms = {};
-  const keys = Object.keys(pages || {});
+  const keys = Object.keys(pages || {}).filter((key) => Array.isArray(pages[key]));
 
   for (const key of keys) {
     const entries = (pages[key] || []).map(normalizeEntry);
@@ -235,6 +235,12 @@ async function init() {
 
     const pages = await response.json();
     PLATFORMS = buildPlatforms(pages);
+    const updatedElement = document.getElementById('updated');
+    if (updatedElement && pages.updated) {
+      const date = new Date(pages.updated);
+      const label = isNaN(date.getTime()) ? pages.updated : date.toLocaleDateString('fr-BE');
+      updatedElement.textContent = 'Liste mise \u00e0 jour le : ' + label;
+    }
 
     const tabsElement = document.getElementById('tabs');
     const panelsElement = document.getElementById('panels');
