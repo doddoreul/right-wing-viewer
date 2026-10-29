@@ -282,16 +282,15 @@ function allUnvisitedEntries() {
 }
 
 function setupDraw() {
-  const button = document.getElementById('draw-button');
   const card = document.getElementById('draw-card');
   const nameElement = document.getElementById('draw-name');
   const groupElement = document.getElementById('draw-group');
   const urlElement = document.getElementById('draw-url');
   const emptyElement = document.getElementById('draw-empty');
 
-  if (!button) return;
+  if (!card) return;
 
-  button.addEventListener('click', () => {
+  const drawRandom = () => {
     const candidates = allUnvisitedEntries();
     if (!candidates.length) {
       card.hidden = true;
@@ -318,13 +317,15 @@ function setupDraw() {
     groupElement.textContent = pick.entry.group;
     urlElement.textContent = pick.entry.url;
     card.hidden = false;
-  });
+  };
 
   card.addEventListener('click', () => {
     if (!drawn) return;
     lastOpened = { entry: drawn.entry, markVisited: drawn.markVisited };
     window.open(drawn.entry.url, '_blank', 'noopener');
   });
+
+  drawRandom();
 }
 
 async function init() {
