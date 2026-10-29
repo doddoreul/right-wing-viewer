@@ -82,12 +82,7 @@ function makeRenderer(k){
       indicator.textContent = '▾';
       const titleSpan = document.createElement('span');
       titleSpan.textContent = `${g} (${groupEntries.length})`;
-      const openAllBtn = document.createElement('button');
-      openAllBtn.type = 'button';
-      openAllBtn.textContent = 'Ouvrir tout';
-      openAllBtn.style.fontSize = '.8rem';
-      openAllBtn.style.padding = '2px 8px';
-      h2.append(indicator, titleSpan, openAllBtn);
+      h2.append(indicator, titleSpan);
       h2.style.cursor = 'pointer';
       section.appendChild(h2);
       const ol = document.createElement('ol');
@@ -129,21 +124,9 @@ function makeRenderer(k){
       }
       let collapsed = false;
       h2.addEventListener('click', (ev) => {
-        if(ev.target === openAllBtn) return;
         collapsed = !collapsed;
         ol.style.display = collapsed ? 'none' : '';
         indicator.textContent = collapsed ? '▸' : '▾';
-      });
-      openAllBtn.addEventListener('click', (ev) => {
-        ev.stopPropagation();
-        const targets = st.onlyPending ? visibleEntries : groupEntries;
-        for(const e of targets){
-          const a = document.createElement('a');
-          a.href = e.url; a.target = '_blank'; a.rel = 'noopener noreferrer';
-          document.body.appendChild(a);
-          a.click();
-          a.remove();
-        }
       });
       section.appendChild(ol); container.appendChild(section);
     }
