@@ -13,6 +13,7 @@ const TAB_LABELS = {
 let current = null;
 const state = {};
 let lastOpened = null;
+let drawn = null;
 let PLATFORMS = null;
 const renderers = {};
 
@@ -266,6 +267,66 @@ function showBlockModal(entry, onConfirm) {
   modal.addEventListener('click', handleBackdrop);
 }
 
+function allUnvisitedEntries() {
+  const result = [];
+  for (const platformKey in PLATFORMS) {
+    const platform = PLATFORMS[platformKey];
+    const platformState = state[platformKey];
+    for (const entry of platform.entries) {
+      if (!platformState.visited.has(entry.url)) {
+        result.push({ platformKey: platformKey, entry: entry });
+      }
+    }
+  }
+  return result;
+}
+
+function setupDraw() {
+  const button = document.getElementById('draw-button');
+  const card = document.getElementById('draw-card');
+  const nameElement = document.getElementById('draw-name');
+  const groupElement = document.getElementById('draw-group');
+  const urlElement = document.getElementById('draw-url');
+  const emptyElement = document.getElementById('draw-empty');
+
+  if (!button) return;
+
+  button.addEventListener('click', () => {
+    const candidates = allUnvisitedEntries();
+    if (!candidates.length) {
+      card.hidden = true;
+      emptyElement.hidden = false;
+      drawn = null;
+      return;
+    }
+    emptyElement.hidden = true;
+    const pick = candidates[Math.floor(Math.random() * candidates.length)];
+    drawn = {
+      platformKey: pick.platformKey,
+      entry: pick.entry,
+      markVisited: () => {
+        const platform = PLATFORMS[pick.platformKey];
+        const platformState = state[pick.platformKey];
+        platformState.visited.add(pick.entry.url);
+        saveVisited(platform.key, platformState.visited);
+        if (pick.platformKey === current) {
+          renderCurrent();
+        }
+      }
+    };
+    nameElement.textContent = pick.entry.name;
+    groupElement.textContent = pick.entry.group;
+    urlElement.textContent = pick.entry.url;
+    card.hidden = false;
+  });
+
+  card.addEventListener('click', () => {
+    if (!drawn) return;
+    lastOpened = { entry: drawn.entry, markVisited: drawn.markVisited };
+    window.open(drawn.entry.url, '_blank', 'noopener');
+  });
+}
+
 async function init() {
   try {
     const response = await fetch('pages.json');
@@ -339,6 +400,8 @@ async function init() {
     });
 
     renderCurrent();
+
+    setupDraw();
 
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState !== 'visible' || !lastOpened) return;
