@@ -1,9 +1,16 @@
 'use strict';
 
-const TAB_LABELS = { fb: 'Facebook', ig: 'Instagram', x: 'X' };
-const PLATFORM_KEYS = { facebook: 'fb', instagram: 'ig', x: 'x' };
+const TAB_LABELS = {
+  facebook: 'Facebook',
+  instagram: 'Instagram',
+  x: 'X',
+  youtube: 'YouTube',
+  telegram: 'Telegram',
+  websites: 'Sites web',
+  _to_verify: '\u00c0 v\u00e9rifier'
+};
 
-let current = 'fb';
+let current = null;
 const state = {};
 let PLATFORMS = null;
 const renderers = {};
@@ -35,22 +42,40 @@ function saveVisited(key, visited) {
   }
 }
 
+function normalizeEntry(entry) {
+  if (typeof entry === 'string') {
+    return { url: entry, name: entry, group: '\u00c0 v\u00e9rifier' };
+  }
+  return {
+    url: entry.url,
+    name: entry.name || entry.url,
+    group: entry.group || 'Divers'
+  };
+}
+
 function buildPlatforms(pages) {
   const platforms = {};
-  for (const [jsonKey, platformKey] of Object.entries(PLATFORM_KEYS)) {
-    const entries = pages[jsonKey] || [];
-    platforms[platformKey] = {
+  const keys = Object.keys(pages || {});
+
+  for (const key of keys) {
+    const entries = (pages[key] || []).map(normalizeEntry);
+    platforms[key] = {
       entries: entries,
       groups: deriveGroups(entries),
-      key: platformKey + '-page-list-visited-v1',
-      container: 'groups-' + platformKey,
-      label: TAB_LABELS[platformKey]
+      key: key + '-page-list-visited-v1',
+      container: 'groups-' + key,
+      label: TAB_LABELS[key] || (key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' '))
     };
-    state[platformKey] = {
-      visited: loadVisited(platforms[platformKey].key),
+    state[key] = {
+      visited: loadVisited(platforms[key].key),
       onlyPending: false
     };
   }
+
+  if (current === null && keys.length) {
+    current = keys[0];
+  }
+
   return platforms;
 }
 
