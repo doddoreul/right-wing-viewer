@@ -238,7 +238,7 @@ async function init() {
     const updatedElement = document.getElementById('updated');
     if (updatedElement && pages.updated) {
       const date = new Date(pages.updated);
-      const label = isNaN(date.getTime()) ? pages.updated : date.toLocaleDateString('fr-BE');
+      const label = isNaN(date.getTime()) ? pages.updated : date.toLocaleString('fr-BE');
       updatedElement.textContent = 'Liste mise \u00e0 jour le : ' + label;
     }
 
