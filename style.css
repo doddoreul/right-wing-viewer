@@ -152,6 +152,7 @@ a {
   background: #f5f8ff;
   cursor: pointer;
   width: 50%;
+  box-sizing: border-box;
 }
 
 .draw-card h2 {
