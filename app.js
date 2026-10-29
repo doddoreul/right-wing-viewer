@@ -238,6 +238,7 @@ function setupDraw() {
   const groupElement = document.getElementById('draw-group');
   const urlElement = document.getElementById('draw-url');
   const emptyElement = document.getElementById('draw-empty');
+  const visitButton = document.getElementById('draw-visit');
 
   if (!card) return;
 
@@ -275,6 +276,15 @@ function setupDraw() {
     drawn.markVisited();
     window.open(drawn.entry.url, '_blank', 'noopener');
   });
+
+  if (visitButton) {
+    visitButton.addEventListener('click', (event) => {
+      event.stopPropagation();
+      if (!drawn) return;
+      drawn.markVisited();
+      window.open(drawn.entry.url, '_blank', 'noopener');
+    });
+  }
 
   drawRandom();
 }
