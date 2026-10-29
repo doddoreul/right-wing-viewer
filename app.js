@@ -167,20 +167,25 @@ function makeRenderer(platformKey) {
           updateCount(platformKey, shown);
         });
 
-        link.addEventListener('click', () => {
-          platformState.visited.add(entry.url);
-          saveVisited(platform.key, platformState.visited);
+        link.addEventListener('click', (event) => {
+          event.preventDefault();
+          showBlockModal(entry, () => {
+            platformState.visited.add(entry.url);
+            saveVisited(platform.key, platformState.visited);
 
-          item.classList.add('visited');
-          marker.className = 'mark done';
-          marker.textContent = '\u2713';
-          marker.title = 'Visitée';
-          marker.setAttribute('aria-label', 'Visitée');
+            item.classList.add('visited');
+            marker.className = 'mark done';
+            marker.textContent = '\u2713';
+            marker.title = 'Visit\u00e9e';
+            marker.setAttribute('aria-label', 'Visit\u00e9e');
 
-          const visitedAfter = groupEntries.filter((entry) => platformState.visited.has(entry.url)).length;
-          title.textContent = `${group}: ${visitedAfter}/${groupEntries.length}`;
+            const visitedAfter = groupEntries.filter((e) => platformState.visited.has(e.url)).length;
+            title.textContent = `${group}: ${visitedAfter}/${groupEntries.length}`;
 
-          updateCount(platformKey, shown);
+            updateCount(platformKey, shown);
+
+            window.open(entry.url, '_blank', 'noopener');
+          });
         });
 
         item.append(link, url, marker);
@@ -214,6 +219,48 @@ function updateCount(platformKey, shown) {
   document.getElementById('count').textContent =
     `${visitedCount} / ${platform.entries.length} visitées` +
     (platformState.onlyPending ? ` \u2014 ${shown} non visitées affichées` : '');
+}
+
+function showBlockModal(entry, onConfirm) {
+  const modal = document.getElementById('modal');
+  const titleElement = document.getElementById('modal-title');
+  const urlElement = document.getElementById('modal-url');
+  const confirmButton = document.getElementById('modal-confirm');
+  const cancelButton = document.getElementById('modal-cancel');
+
+  titleElement.textContent = entry.name;
+  urlElement.textContent = entry.url;
+  modal.classList.add('active');
+
+  const close = () => modal.classList.remove('active');
+
+  const handleConfirm = () => {
+    close();
+    cleanup();
+    if (onConfirm) onConfirm();
+  };
+
+  const handleCancel = () => {
+    close();
+    cleanup();
+  };
+
+  const handleBackdrop = (event) => {
+    if (event.target === modal) {
+      close();
+      cleanup();
+    }
+  };
+
+  function cleanup() {
+    confirmButton.removeEventListener('click', handleConfirm);
+    cancelButton.removeEventListener('click', handleCancel);
+    modal.removeEventListener('click', handleBackdrop);
+  }
+
+  confirmButton.addEventListener('click', handleConfirm);
+  cancelButton.addEventListener('click', handleCancel);
+  modal.addEventListener('click', handleBackdrop);
 }
 
 async function init() {
