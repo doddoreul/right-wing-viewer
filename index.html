@@ -1,215 +1,34 @@
 <!doctype html>
 <html lang="fr">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Liste de pages à bloquer</title>
-<style>
-:root{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color-scheme:light dark}
-body{max-width:1000px;margin:0 auto;padding:24px 16px 48px;line-height:1.5}
-h1{font-size:clamp(1.5rem,4vw,2rem);margin-bottom:6px}
-h2{font-size:1.15rem;margin:22px 0 6px;border-bottom:2px solid #8884;padding-bottom:4px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;cursor:pointer}
-.intro{margin-top:0;opacity:.8}
-.toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:18px 0}
-#count{font-weight:650;margin-right:auto}
-button{font:inherit;padding:8px 12px;border:1px solid #8888;border-radius:8px;cursor:pointer}
-.tabs{display:flex;gap:8px;margin:18px 0 6px;flex-wrap:wrap}
-.tab{padding:8px 14px;border:1px solid #8888;border-radius:8px 8px 0 0;cursor:pointer;background:transparent}
-.tab.active{background:#1769d2;color:#fff;border-color:#1769d2}
-.panel{display:none}.panel.active{display:block}
-section{margin-bottom:8px}
-ol{padding-left:2.3rem}li{padding:7px 8px;border-bottom:1px solid #8883;overflow-wrap:anywhere}
-li.visited{opacity:.72}
-a{color:#1769d2}@media(prefers-color-scheme:dark){a{color:#8ab4ff}}
-.url{display:inline;font-size:.82rem;opacity:.62;overflow-wrap:anywhere;margin-left:.5rem}
-.mark{display:inline-block;min-width:1.5em;margin-left:6px;font-size:.9em;font-weight:700;cursor:pointer}
-.mark.done{color:#16803d}.mark.pending{opacity:.45}.hint{font-size:.9rem;opacity:.75}
-.error{color:#b00020}
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Liste de pages à bloquer</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<h1>Liste de pages à bloquer</h1>
-<p class="intro">Données chargées depuis <code>pages.json</code>. Chaque lien s’ouvre dans un nouvel onglet. Un clic sur le lien ou sur le marqueur vert bascule l’état « visité ».</p>
-<div class="tabs" id="tabs"></div>
-<div class="toolbar">
-<span id="count" aria-live="polite">0 / 0 visitées</span>
-<button id="all" type="button">Afficher toutes</button>
-<button id="pending" type="button">Afficher les non visitées</button>
-<button id="reset" type="button">Réinitialiser les marqueurs</button>
-</div>
-<p class="hint">Les marqueurs sont enregistrés localement dans ce navigateur. Pour modifier la liste, éditez <code>pages.json</code>.</p>
-<div id="panels"></div>
-<script>
-'use strict';
-const TAB_LABELS = { fb: 'Facebook', ig: 'Instagram', x: 'X' };
-// map platform key from json keys
-const PLATFORM_KEYS = { facebook: 'fb', instagram: 'ig', x: 'x' };
-let PAGES = null;
-let current = 'fb';
-const state = {};
+  <h1>Liste de pages à bloquer</h1>
+  <p class="intro">
+    Données chargées depuis <code>pages.json</code>. Chaque lien s’ouvre dans un nouvel onglet.
+    Un clic sur le lien ou sur le marqueur vert bascule l’état « visité ».
+  </p>
 
-function deriveGroups(entries){
-  const g = [];
-  for(const e of entries){ if(!g.includes(e.group)) g.push(e.group); }
-  return g;
-}
+  <div class="tabs" id="tabs"></div>
 
-function loadVisited(key){
-  try { const arr = JSON.parse(localStorage.getItem(key) || '[]'); return new Set(Array.isArray(arr) ? arr : []); }
-  catch { return new Set(); }
-}
-function saveVisited(key, set){ try{ localStorage.setItem(key, JSON.stringify([...set])); }catch{} }
+  <div class="toolbar">
+    <span id="count" aria-live="polite">0 / 0 visitées</span>
+    <button id="all" type="button">Afficher toutes</button>
+    <button id="pending" type="button">Afficher les non visitées</button>
+    <button id="reset" type="button">Réinitialiser les marqueurs</button>
+  </div>
 
-function buildPlatforms(pages){
-  const platforms = {};
-  for(const [jsonKey, pk] of Object.entries(PLATFORM_KEYS)){
-    const entries = pages[jsonKey] || [];
-    platforms[pk] = {
-      entries: entries,
-      groups: deriveGroups(entries),
-      key: pk + '-page-list-visited-v1',
-      container: 'groups-' + pk,
-      label: TAB_LABELS[pk]
-    };
-    state[pk] = { visited: loadVisited(platforms[pk].key), onlyPending: false };
-  }
-  return platforms;
-}
+  <p class="hint">
+    Les marqueurs sont enregistrés localement dans ce navigateur.
+    Pour modifier la liste, éditez <code>pages.json</code>.
+  </p>
 
-let PLATFORMS = null;
-const renderers = {};
+  <div id="panels"></div>
 
-function makeRenderer(pk){
-  const p = PLATFORMS[pk];
-  const entries = p.entries;
-  const groups = p.groups;
-  const container = document.getElementById(p.container);
-  const st = state[pk];
-  return function render(){
-    if(pk !== current) return;
-    container.replaceChildren();
-    let shown = 0;
-    for(const g of groups){
-      const groupEntries = entries.filter(e => e.group === g);
-      const visibleEntries = st.onlyPending ? groupEntries.filter(e => !st.visited.has(e.url)) : groupEntries;
-      if(!visibleEntries.length) continue;
-      const section = document.createElement('section');
-      const h2 = document.createElement('h2');
-      const indicator = document.createElement('span');
-      indicator.textContent = '▾';
-      const titleSpan = document.createElement('span');
-      titleSpan.textContent = `${g} (${groupEntries.length})`;
-      h2.append(indicator, titleSpan);
-      section.appendChild(h2);
-      const ol = document.createElement('ol');
-      for(const e of groupEntries){
-        const done = st.visited.has(e.url);
-        if(st.onlyPending && done) continue;
-        shown++;
-        const li = document.createElement('li');
-        if(done) li.classList.add('visited');
-        const a = document.createElement('a');
-        a.href = e.url; a.target = '_blank'; a.rel = 'noopener noreferrer';
-        a.textContent = e.name; a.title = e.url;
-        const urlSpan = document.createElement('span');
-        urlSpan.className = 'url'; urlSpan.textContent = e.url;
-        const marker = document.createElement('span');
-        marker.className = 'mark ' + (done ? 'done' : 'pending');
-        marker.textContent = done ? '✓' : '○';
-        marker.title = done ? 'Visitée' : 'Pas encore visitée';
-        marker.setAttribute('aria-label', marker.title);
-        marker.addEventListener('click', (ev) => {
-          ev.preventDefault(); ev.stopPropagation();
-          if(st.visited.has(e.url)) st.visited.delete(e.url); else st.visited.add(e.url);
-          saveVisited(p.key, st.visited);
-          const now = st.visited.has(e.url);
-          li.classList.toggle('visited', now);
-          marker.className = 'mark ' + (now ? 'done' : 'pending');
-          marker.textContent = now ? '✓' : '○';
-          marker.title = now ? 'Visitée' : 'Pas encore visitée';
-          marker.setAttribute('aria-label', marker.title);
-          updateCount(pk, shown);
-        });
-        a.addEventListener('click', () => {
-          st.visited.add(e.url); saveVisited(p.key, st.visited);
-          li.classList.add('visited'); marker.className = 'mark done';
-          marker.textContent = '✓'; marker.title = 'Visitée'; marker.setAttribute('aria-label','Visitée');
-          updateCount(pk, shown);
-        });
-        li.append(a, urlSpan, marker); ol.appendChild(li);
-      }
-      let collapsed = false;
-      h2.addEventListener('click', () => {
-        collapsed = !collapsed;
-        ol.style.display = collapsed ? 'none' : '';
-        indicator.textContent = collapsed ? '▸' : '▾';
-      });
-      section.appendChild(ol); container.appendChild(section);
-    }
-    updateCount(pk, shown);
-  };
-}
-
-function updateCount(pk, shown){
-  if(pk !== current) return;
-  const p = PLATFORMS[pk];
-  const st = state[pk];
-  const n = p.entries.filter(e => st.visited.has(e.url)).length;
-  document.getElementById('count').textContent = `${n} / ${p.entries.length} visitées` + (st.onlyPending ? ` — ${shown} non visitées affichées` : '');
-}
-
-async function init(){
-  try {
-    const res = await fetch('pages.json');
-    if(!res.ok) throw new Error('HTTP ' + res.status);
-    const pages = await res.json();
-    PLATFORMS = buildPlatforms(pages);
-    // tabs
-    const tabsEl = document.getElementById('tabs');
-    const panelsEl = document.getElementById('panels');
-    for(const pk in PLATFORMS){
-      const p = PLATFORMS[pk];
-      const btn = document.createElement('button');
-      btn.className = 'tab' + (pk === current ? ' active' : '');
-      btn.dataset.tab = pk;
-      btn.textContent = p.label;
-      tabsEl.appendChild(btn);
-      const panel = document.createElement('div');
-      panel.id = 'panel-' + pk;
-      panel.className = 'panel' + (pk === current ? ' active' : '');
-      const div = document.createElement('div');
-      div.id = p.container;
-      panel.appendChild(div);
-      panelsEl.appendChild(panel);
-    }
-    for(const pk in PLATFORMS){ renderers[pk] = makeRenderer(pk); }
-    document.querySelectorAll('.tab').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        current = btn.dataset.tab;
-        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-        document.getElementById('panel-' + current).classList.add('active');
-        renderCurrent();
-      });
-    });
-    document.getElementById('all').addEventListener('click',()=>{ state[current].onlyPending=false; renderCurrent(); });
-    document.getElementById('pending').addEventListener('click',()=>{ state[current].onlyPending=true; renderCurrent(); });
-    document.getElementById('reset').addEventListener('click',()=>{
-      if(confirm('Effacer tous les marqueurs enregistrés pour cet onglet ?')){ state[current].visited.clear(); saveVisited(PLATFORMS[current].key, state[current].visited); renderCurrent(); }
-    });
-    renderCurrent();
-  } catch(err) {
-    document.getElementById('panels').innerHTML = '<p class="error">Impossible de charger pages.json : ' + err.message + '. Lancez un serveur local (ex. python -m http.server) ou vérifiez le fichier.</p>';
-  }
-}
-function renderCurrent(){
-  for(const k in PLATFORMS){
-    if(k !== current) document.getElementById(PLATFORMS[k].container).replaceChildren();
-  }
-  renderers[current]();
-}
-init();
-</script>
+  <script src="app.js"></script>
 </body>
 </html>

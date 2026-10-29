@@ -1,0 +1,145 @@
+:root {
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  color-scheme: light dark;
+}
+
+body {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+  line-height: 1.5;
+}
+
+h1 {
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  margin-bottom: 6px;
+}
+
+h2 {
+  font-size: 1.15rem;
+  margin: 22px 0 6px;
+  border-bottom: 2px solid #8884;
+  padding-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  cursor: pointer;
+}
+
+.intro {
+  margin-top: 0;
+  opacity: 0.8;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin: 18px 0;
+}
+
+#count {
+  font-weight: 650;
+  margin-right: auto;
+}
+
+button {
+  font: inherit;
+  padding: 8px 12px;
+  border: 1px solid #8888;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin: 18px 0 6px;
+  flex-wrap: wrap;
+}
+
+.tab {
+  padding: 8px 14px;
+  border: 1px solid #8888;
+  border-radius: 8px 8px 0 0;
+  cursor: pointer;
+  background: transparent;
+}
+
+.tab.active {
+  background: #1769d2;
+  color: #fff;
+  border-color: #1769d2;
+}
+
+.panel {
+  display: none;
+}
+
+.panel.active {
+  display: block;
+}
+
+section {
+  margin-bottom: 8px;
+}
+
+ol {
+  padding-left: 2.3rem;
+}
+
+li {
+  padding: 7px 8px;
+  border-bottom: 1px solid #8883;
+  overflow-wrap: anywhere;
+}
+
+li.visited {
+  opacity: 0.72;
+}
+
+a {
+  color: #1769d2;
+}
+
+@media (prefers-color-scheme: dark) {
+  a {
+    color: #8ab4ff;
+  }
+}
+
+.url {
+  display: inline;
+  font-size: 0.82rem;
+  opacity: 0.62;
+  overflow-wrap: anywhere;
+  margin-left: 0.5rem;
+}
+
+.mark {
+  display: inline-block;
+  min-width: 1.5em;
+  margin-left: 6px;
+  font-size: 0.9em;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.mark.done {
+  color: #16803d;
+}
+
+.mark.pending {
+  opacity: 0.45;
+}
+
+.hint {
+  font-size: 0.9rem;
+  opacity: 0.75;
+}
+
+.error {
+  color: #b00020;
+}
