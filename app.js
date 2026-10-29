@@ -12,6 +12,7 @@ const TAB_LABELS = {
 
 let current = null;
 const state = {};
+let lastOpened = null;
 let PLATFORMS = null;
 const renderers = {};
 
@@ -169,7 +170,8 @@ function makeRenderer(platformKey) {
 
         link.addEventListener('click', (event) => {
           event.preventDefault();
-          showBlockModal(entry, () => {
+
+          const markVisited = () => {
             platformState.visited.add(entry.url);
             saveVisited(platform.key, platformState.visited);
 
@@ -183,9 +185,10 @@ function makeRenderer(platformKey) {
             title.textContent = `${group}: ${visitedAfter}/${groupEntries.length}`;
 
             updateCount(platformKey, shown);
+          };
 
-            window.open(entry.url, '_blank', 'noopener');
-          });
+          lastOpened = { entry: entry, markVisited: markVisited };
+          window.open(entry.url, '_blank', 'noopener');
         });
 
         item.append(link, url, marker);
@@ -336,6 +339,15 @@ async function init() {
     });
 
     renderCurrent();
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState !== 'visible' || !lastOpened) return;
+      const opened = lastOpened;
+      lastOpened = null;
+      showBlockModal(opened.entry, () => {
+        opened.markVisited();
+      });
+    });
   } catch (error) {
     document.getElementById('panels').innerHTML =
       '<p class="error">Impossible de charger pages.json : ' + error.message +
