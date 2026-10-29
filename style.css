@@ -151,6 +151,7 @@ a {
   border-radius: 0;
   background: #f5f8ff;
   cursor: pointer;
+  width: 50%;
 }
 
 .draw-card h2 {
