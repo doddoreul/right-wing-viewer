@@ -137,7 +137,13 @@ function makeRenderer(k){
       openAllBtn.addEventListener('click', (ev) => {
         ev.stopPropagation();
         const targets = st.onlyPending ? visibleEntries : groupEntries;
-        for(const e of targets){ window.open(e.url, '_blank', 'noopener'); }
+        for(const e of targets){
+          const a = document.createElement('a');
+          a.href = e.url; a.target = '_blank'; a.rel = 'noopener noreferrer';
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+        }
       });
       section.appendChild(ol); container.appendChild(section);
     }
