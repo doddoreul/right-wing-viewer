@@ -319,7 +319,7 @@ async function init() {
     const response = await fetch('pages.json');
     if (!response.ok) throw new Error('HTTP ' + response.status);
 
-    const pages = await res.json();
+    const pages = await response.json();
 
     const platformData = {};
     const socialPlatforms = ['facebook', 'instagram', 'x', 'youtube', 'telegram'];
