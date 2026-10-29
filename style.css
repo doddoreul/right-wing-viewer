@@ -182,6 +182,19 @@ a {
   .tab {
     min-height: 44px;
   }
+
+  .draw-card {
+    width: 100%;
+  }
+
+  .tabs {
+    gap: 4px;
+  }
+
+  .tab {
+    flex: 1 1 auto;
+    text-align: center;
+  }
 }
 
 #draw-visit {
