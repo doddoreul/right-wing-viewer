@@ -7,7 +7,9 @@ const TAB_LABELS = {
   youtube: 'YouTube',
   telegram: 'Telegram',
   websites: 'Sites web',
-  _to_verify: '\u00c0 v\u00e9rifier'
+  _to_verify: '\u00c0 v\u00e9rifier',
+  personnalites_extreme_droite_monde: 'Personnalit\u00e9s extr\u00eame droite (monde)',
+  personnalites_droite_france: 'Personnalit\u00e9s droite (France)'
 };
 
 let current = null;
@@ -249,6 +251,7 @@ function allUnvisitedEntries() {
 function setupDraw() {
   const card = document.getElementById('draw-card');
   const nameElement = document.getElementById('draw-name');
+  const platformElement = document.getElementById('draw-platform');
   const groupElement = document.getElementById('draw-group');
   const emptyElement = document.getElementById('draw-empty');
   const visitButton = document.getElementById('draw-visit');
@@ -282,6 +285,7 @@ function setupDraw() {
       }
     };
     nameElement.textContent = pick.entry.name;
+    platformElement.textContent = TAB_LABELS[pick.platformKey] || pick.platformKey;
     groupElement.textContent = pick.entry.group;
     card.hidden = false;
   };
@@ -315,8 +319,37 @@ async function init() {
     const response = await fetch('pages.json');
     if (!response.ok) throw new Error('HTTP ' + response.status);
 
-    const pages = await response.json();
-    PLATFORMS = buildPlatforms(pages);
+    const pages = await res.json();
+
+    const platformData = {};
+    const socialPlatforms = ['facebook', 'instagram', 'x', 'youtube', 'telegram'];
+
+    for (const key of Object.keys(pages || {})) {
+      if (key === 'updated') continue;
+      const value = pages[key];
+      if (!Array.isArray(value)) continue;
+
+      const isPersonalityList = value.length && value.every((item) => item && typeof item === 'object' && !Array.isArray(item) && !item.url);
+
+      if (isPersonalityList) {
+        for (const person of value) {
+          for (const platform of socialPlatforms) {
+            const url = person[platform];
+            if (!url) continue;
+            platformData[platform] = platformData[platform] || [];
+            platformData[platform].push({
+              url: url,
+              name: person.name + (person.pays ? ' (' + person.pays + ')' : ''),
+              group: person.pays || key
+            });
+          }
+        }
+      } else {
+        platformData[key] = value;
+      }
+    }
+
+    PLATFORMS = buildPlatforms(platformData);
     const updatedElement = document.getElementById('updated');
     if (updatedElement && pages.updated) {
       const date = new Date(pages.updated);
