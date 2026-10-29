@@ -496,6 +496,16 @@
       "group": "Debout les Belges"
     },
     {
+      "url": "https://www.facebook.com/reconquete2022",
+      "name": "Reconquête",
+      "group": "Reconquête"
+    },
+    {
+      "url": "https://www.facebook.com/ZemmourTV/",
+      "name": "Zemmour TV",
+      "group": "Médias (France)"
+    },
+    {
       "url": "https://www.facebook.com/p/Vlaamse-Volksbeweging-Limburg-100068816320692/",
       "name": "Vlaamse Volksbeweging Limburg",
       "group": "Vlaamse Beweging (organisations)"
@@ -503,37 +513,37 @@
     {
       "url": "https://www.facebook.com/21NewsBe",
       "name": "21News",
-      "group": "Médias (Belgique)"
+      "group": "Médias (Flandre)"
     },
     {
       "url": "https://www.facebook.com/BMagOfficiel",
       "name": "B-Mag",
-      "group": "Médias (Belgique)"
+      "group": "Médias (Flandre)"
     },
     {
       "url": "https://www.facebook.com/BelgicaNews",
       "name": "Belgica News",
-      "group": "Médias (Belgique)"
+      "group": "Médias (Flandre)"
     },
     {
       "url": "https://www.facebook.com/doorbraakbe",
       "name": "Doorbraak",
-      "group": "Médias (Belgique)"
+      "group": "Médias (Flandre)"
     },
     {
       "url": "https://www.facebook.com/tScheldtbe",
       "name": "TScheldt",
-      "group": "Médias (Belgique)"
+      "group": "Médias (Flandre)"
     },
     {
       "url": "https://www.facebook.com/palnws/",
       "name": "PAL NWS",
-      "group": "Médias (Belgique)"
+      "group": "Médias (Flandre)"
     },
     {
       "url": "https://www.facebook.com/tpallieterke/",
       "name": "'t Pallieterke",
-      "group": "Médias (Belgique)"
+      "group": "Médias (Flandre)"
     },
     {
       "url": "https://www.facebook.com/canalplus",
@@ -573,7 +583,7 @@
     {
       "url": "https://www.facebook.com/lalibre.be/",
       "name": "La Libre",
-      "group": "Médias (Belgique)"
+      "group": "Médias (Wallonie/Bruxelles)"
     },
     {
       "url": "https://www.facebook.com/bvoltaire.fr",
@@ -1097,7 +1107,7 @@
     {
       "name": "Geert Wilders",
       "url": "https://x.com/geertwilderspvv",
-      "group": "Profils"
+      "group": "Pays-Bas"
     },
     {
       "name": "Georges-L BOUCHEZ",
@@ -1172,7 +1182,7 @@
     {
       "name": "Marine Le Pen",
       "url": "https://x.com/MLP_officiel",
-      "group": "Profils"
+      "group": "France"
     },
     {
       "name": "Michel Onfray TV",
@@ -1302,7 +1312,7 @@
     {
       "name": "Thierry Baudet",
       "url": "https://x.com/thierrybaudet",
-      "group": "Profils"
+      "group": "Pays-Bas"
     },
     {
       "name": "Tom Van Grieken",
@@ -1352,14 +1362,14 @@
     {
       "name": "Éric Zemmour",
       "url": "https://x.com/ZemmourEric",
-      "group": "Profils"
+      "group": "France"
     }
   ],
   "youtube": [
     {
       "url": "https://www.youtube.com/@PALNWS",
       "name": "PAL NWS",
-      "group": "Médias (Belgique)"
+      "group": "Médias (Flandre)"
     },
     {
       "url": "https://www.youtube.com/c/deboutlesbelges",
@@ -1403,37 +1413,37 @@
     {
       "url": "https://pal.be/",
       "name": "PAL (ex-SCEPTR / PAL NWS)",
-      "group": "Médias (Belgique)"
+      "group": "Médias (Flandre)"
     },
     {
       "url": "https://www.de-lage-landen.com/",
       "name": "de lage landen",
-      "group": "Médias (Belgique)"
+      "group": "Médias (Flandre)"
     },
     {
       "url": "https://www.lalibre.be/",
       "name": "La Libre",
-      "group": "Médias (Belgique)"
+      "group": "Médias (Wallonie/Bruxelles)"
     },
     {
       "url": "https://www.sudinfo.be/",
       "name": "Sudinfo",
-      "group": "Médias (Belgique)"
+      "group": "Médias (Wallonie/Bruxelles)"
     },
     {
       "url": "https://www.lecho.be/",
       "name": "L'Écho",
-      "group": "Médias (Belgique)"
+      "group": "Médias (Wallonie/Bruxelles)"
     },
     {
       "url": "https://www.levif.be/",
       "name": "Le Vif",
-      "group": "Médias (Belgique)"
+      "group": "Médias (Wallonie/Bruxelles)"
     },
     {
       "url": "https://www.ln24.be/",
       "name": "LN24",
-      "group": "Médias (Belgique)"
+      "group": "Médias (Wallonie/Bruxelles)"
     },
     {
       "url": "https://fdesouche.com/",
@@ -1471,7 +1481,145 @@
       "group": "Vlaamse Beweging (organisations)"
     }
   ],
+  "personnalites_extreme_droite_monde": [
+    {
+      "pays": "États-Unis",
+      "name": "Donald Trump",
+      "x": "https://x.com/realDonaldTrump",
+      "facebook": "https://www.facebook.com/DonaldTrump",
+      "instagram": "https://www.instagram.com/realdonaldtrump/",
+      "a_verifier": true
+    },
+    {
+      "pays": "France",
+      "name": "Jordan Bardella",
+      "x": "https://x.com/J_Bardella",
+      "a_verifier": true
+    },
+    {
+      "pays": "France",
+      "name": "Marine Le Pen",
+      "x": "https://x.com/MLP_officiel",
+      "a_verifier": true
+    },
+    {
+      "pays": "France",
+      "name": "Marion Maréchal",
+      "x": "https://x.com/MarionMarechal",
+      "a_verifier": true
+    },
+    {
+      "pays": "France",
+      "name": "Éric Zemmour",
+      "x": "https://x.com/ZemmourEric",
+      "a_verifier": false
+    },
+    {
+      "pays": "Italie",
+      "name": "Giorgia Meloni",
+      "x": "https://x.com/GiorgiaMeloni",
+      "a_verifier": true
+    },
+    {
+      "pays": "Italie",
+      "name": "Matteo Salvini",
+      "x": "https://x.com/matteosalvinimi",
+      "a_verifier": true
+    },
+    {
+      "pays": "Espagne",
+      "name": "Santiago Abascal",
+      "x": "https://x.com/Santi_ABASCAL",
+      "a_verifier": true
+    },
+    {
+      "pays": "Allemagne",
+      "name": "AfD (parti)",
+      "x": "https://x.com/AfD",
+      "a_verifier": true
+    },
+    {
+      "pays": "Allemagne",
+      "name": "Alice Weidel",
+      "x": "https://x.com/Alice_Weidel",
+      "a_verifier": true
+    },
+    {
+      "pays": "Royaume-Uni",
+      "name": "Nigel Farage",
+      "x": "https://x.com/Nigel_Farage",
+      "a_verifier": true
+    },
+    {
+      "pays": "Israël",
+      "name": "Benyamin Netanyahou",
+      "x": "https://x.com/netanyahu",
+      "a_verifier": true
+    },
+    {
+      "pays": "Brésil",
+      "name": "Jair Bolsonaro",
+      "x": "https://x.com/jairbolsonaro",
+      "a_verifier": true
+    },
+    {
+      "pays": "Pays-Bas",
+      "name": "Geert Wilders",
+      "x": "https://x.com/geertwilderspvv",
+      "a_verifier": false
+    },
+    {
+      "pays": "Pays-Bas",
+      "name": "Thierry Baudet",
+      "x": "https://x.com/thierrybaudet",
+      "a_verifier": false
+    }
+  ],
+  "personnalites_droite_france": [
+    {
+      "pays": "France",
+      "name": "Emmanuel Macron",
+      "x": "https://x.com/EmmanuelMacron",
+      "facebook": "https://www.facebook.com/EmmanuelMacron",
+      "instagram": "https://www.instagram.com/emmanuelmacron/",
+      "a_verifier": true,
+      "remarque": "Centre (Renaissance), pas droite ni extrême droite"
+    },
+    {
+      "pays": "France",
+      "name": "Nicolas Sarkozy",
+      "x": "https://x.com/NicolasSarkozy",
+      "facebook": "https://www.facebook.com/NicolasSarkozy",
+      "instagram": "https://www.instagram.com/nicolassarkozy/",
+      "a_verifier": true,
+      "remarque": "Droite (LR, ancien président)"
+    },
+    {
+      "pays": "France",
+      "name": "Sébastien Lecornu",
+      "x": null,
+      "facebook": null,
+      "instagram": null,
+      "a_verifier": true,
+      "remarque": "Premier ministre ; identifiants non trouvés"
+    },
+    {
+      "pays": "France",
+      "name": "Bruno Retailleau",
+      "x": "https://x.com/BrunoRetailleau",
+      "a_verifier": true,
+      "remarque": "Droite (LR)"
+    },
+    {
+      "pays": "France",
+      "name": "Éric Ciotti",
+      "x": "https://x.com/ECiotti",
+      "a_verifier": true,
+      "remarque": "Droite (UDR)"
+    }
+  ],
   "_to_verify": [
+    "https://www.facebook.com/palnws/",
     "https://www.facebook.com/tpallieterke/",
     "https://www.facebook.com/openvld/",
     "https://www.facebook.com/cdenv/",
@@ -1489,5 +1637,5 @@
     "https://t.me/TVLofficiel",
     "https://vvb.org/"
   ],
-  "updated": "2026-10-29T13:11:25"
+  "updated": "2026-10-29T19:02:00"
 }
