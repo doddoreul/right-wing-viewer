@@ -107,7 +107,8 @@ function makeRenderer(platformKey) {
       indicator.textContent = '\u25BE';
 
       const title = document.createElement('span');
-      title.textContent = `${group} (${groupEntries.length})`;
+      const visitedInGroup = groupEntries.filter((entry) => platformState.visited.has(entry.url)).length;
+      title.textContent = `${group}: ${visitedInGroup}/${groupEntries.length}`;
 
       heading.append(indicator, title);
       section.appendChild(heading);
@@ -159,6 +160,9 @@ function makeRenderer(platformKey) {
           marker.title = nowVisited ? 'Visitée' : 'Pas encore visitée';
           marker.setAttribute('aria-label', marker.title);
 
+          const visitedNow = groupEntries.filter((entry) => platformState.visited.has(entry.url)).length;
+          title.textContent = `${group}: ${visitedNow}/${groupEntries.length}`;
+
           updateCount(platformKey, shown);
         });
 
@@ -171,6 +175,9 @@ function makeRenderer(platformKey) {
           marker.textContent = '\u2713';
           marker.title = 'Visitée';
           marker.setAttribute('aria-label', 'Visitée');
+
+          const visitedAfter = groupEntries.filter((entry) => platformState.visited.has(entry.url)).length;
+          title.textContent = `${group}: ${visitedAfter}/${groupEntries.length}`;
 
           updateCount(platformKey, shown);
         });
