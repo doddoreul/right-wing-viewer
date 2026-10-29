@@ -13,6 +13,7 @@ const TAB_LABELS = {
 let current = null;
 const state = {};
 let drawn = null;
+let drawRandom = null;
 let PLATFORMS = null;
 const renderers = {};
 
@@ -257,7 +258,7 @@ function setupDraw() {
   card.tabIndex = 0;
   card.setAttribute('role', 'button');
 
-  const drawRandom = () => {
+  drawRandom = () => {
     const candidates = allUnvisitedEntries();
     if (!candidates.length) {
       card.hidden = true;
@@ -384,6 +385,12 @@ async function init() {
     renderCurrent();
 
     setupDraw();
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible' && drawRandom) {
+        drawRandom();
+      }
+    });
   } catch (error) {
     document.getElementById('panels').innerHTML =
       '<p class="error">Impossible de charger pages.json : ' + error.message +
