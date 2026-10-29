@@ -8,12 +8,11 @@
 :root{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color-scheme:light dark}
 body{max-width:1000px;margin:0 auto;padding:24px 16px 48px;line-height:1.5}
 h1{font-size:clamp(1.5rem,4vw,2rem);margin-bottom:6px}
-h2{font-size:1.15rem;margin:22px 0 6px;border-bottom:2px solid #8884;padding-bottom:4px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+h2{font-size:1.15rem;margin:22px 0 6px;border-bottom:2px solid #8884;padding-bottom:4px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;cursor:pointer}
 .intro{margin-top:0;opacity:.8}
 .toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:18px 0}
 #count{font-weight:650;margin-right:auto}
 button{font:inherit;padding:8px 12px;border:1px solid #8888;border-radius:8px;cursor:pointer}
-button.active{background:#1769d2;color:#fff;border-color:#1769d2}
 .tabs{display:flex;gap:8px;margin:18px 0 6px;flex-wrap:wrap}
 .tab{padding:8px 14px;border:1px solid #8888;border-radius:8px 8px 0 0;cursor:pointer;background:transparent}
 .tab.active{background:#1769d2;color:#fff;border-color:#1769d2}
@@ -25,51 +24,69 @@ a{color:#1769d2}@media(prefers-color-scheme:dark){a{color:#8ab4ff}}
 .url{display:inline;font-size:.82rem;opacity:.62;overflow-wrap:anywhere;margin-left:.5rem}
 .mark{display:inline-block;min-width:1.5em;margin-left:6px;font-size:.9em;font-weight:700;cursor:pointer}
 .mark.done{color:#16803d}.mark.pending{opacity:.45}.hint{font-size:.9rem;opacity:.75}
+.error{color:#b00020}
 </style>
 </head>
 <body>
 <h1>Liste de pages à bloquer</h1>
-<p class="intro">Chaque lien s’ouvre dans un nouvel onglet. Un clic sur le lien ou sur le marqueur vert bascule l’état « visité ». Les pages sont regroupées par parti / média.</p>
-<div class="tabs">
-<button class="tab active" data-tab="fb">Facebook</button>
-<button class="tab" data-tab="ig">Instagram</button>
-<button class="tab" data-tab="x">X</button>
-</div>
+<p class="intro">Données chargées depuis <code>pages.json</code>. Chaque lien s’ouvre dans un nouvel onglet. Un clic sur le lien ou sur le marqueur vert bascule l’état « visité ».</p>
+<div class="tabs" id="tabs"></div>
 <div class="toolbar">
 <span id="count" aria-live="polite">0 / 0 visitées</span>
 <button id="all" type="button">Afficher toutes</button>
 <button id="pending" type="button">Afficher les non visitées</button>
 <button id="reset" type="button">Réinitialiser les marqueurs</button>
 </div>
-<p class="hint">Les marqueurs sont enregistrés localement dans ce navigateur et ne sont pas synchronisés entre appareils.</p>
-<div id="panel-fb" class="panel active"><div id="groups-fb"></div></div>
-<div id="panel-ig" class="panel"><div id="groups-ig"></div></div>
-<div id="panel-x" class="panel"><div id="groups-x"></div></div>
+<p class="hint">Les marqueurs sont enregistrés localement dans ce navigateur. Pour modifier la liste, éditez <code>pages.json</code>.</p>
+<div id="panels"></div>
 <script>
 'use strict';
-const PLATFORMS = {
-  fb: { entries: [{"url": "https://www.facebook.com/filipdemanVB", "name": "Filip De Man", "group": "Vlaams Belang"}, {"url": "https://www.facebook.com/fdwvb", "name": "Filip Dewinter", "group": "Vlaams Belang"}, {"url": "https://www.facebook.com/TomVandendriesscheVB", "name": "Tom Vandendriessche", "group": "Vlaams Belang"}, {"url": "https://www.facebook.com/vlbelang", "name": "Vlaams Belang", "group": "Vlaams Belang"}, {"url": "https://www.facebook.com/VBLISTE9", "name": "Vlaams Belang (liste 9)", "group": "Vlaams Belang"}, {"url": "https://www.facebook.com/profile.php?id=100064656013470", "name": "Vlaams Belang (page locale)", "group": "Vlaams Belang"}, {"url": "https://www.facebook.com/VlaamsBelangAalst", "name": "Vlaams Belang Aalst", "group": "Vlaams Belang"}, {"url": "https://www.facebook.com/Vlaamsbelangantwerpen", "name": "Vlaams Belang Antwerpen", "group": "Vlaams Belang"}, {"url": "https://www.facebook.com/vlaamsbelangbeersevlimmeren", "name": "Vlaams Belang Beerse-Vosselaar-Merksplas", "group": "Vlaams Belang"}, {"url": "https://www.facebook.com/VlaamsBelangBrussel", "name": "Vlaams Belang Brussel", "group": "Vlaams Belang"}, {"url": "https://www.facebook.com/profile.php?id=100064821546392", "name": "Vlaams Belang Diksmuide", "group": "Vlaams Belang"}, {"url": "https://www.facebook.com/profile.php?id=100064849114149", "name": "Vlaams Belang Evergem", "group": "Vlaams Belang"}, {"url": "https://www.facebook.com/VBGrimbergen", "name": "Vlaams Belang Grimbergen", "group": "Vlaams Belang"}, {"url": "https://www.facebook.com/VBHechtelEksel", "name": "Vlaams Belang Hechtel-Eksel", "group": "Vlaams Belang"}, {"url": "https://www.facebook.com/profile.php?id=100069029955970", "name": "Vlaams Belang Heers", "group": "Vlaams Belang"}, {"url": "https://www.facebook.com/profile.php?id=100069249338044", "name": "Vlaams Belang Houthalen-Helchteren", "group": "Vlaams Belang"}, {"url": "https://www.facebook.com/VlaamsbelangIzegem", "name": "Vlaams Belang Izegem", "group": "Vlaams Belang"}, {"url": "https://www.facebook.com/vbjabbeke", "name": "Vlaams Belang Jabbeke", "group": "Vlaams Belang"}, {"url": "https://www.facebook.com/vbjongeren", "name": "Vlaams Belang Jongeren", "group": "Vlaams Belang"}, {"url": "https://www.facebook.com/vlaamsbelangkoekelare", "name": "Vlaams Belang Koekelare", "group": "Vlaams Belang"}, {"url": "https://www.facebook.com/profile.php?id=100069064935011", "name": "Vlaams Belang Lierde", "group": "Vlaams Belang"}, {"url": "https://www.facebook.com/profile.php?id=100069314825201", "name": "Vlaams Belang Lochristi", "group": "Vlaams Belang"}, {"url": "https://www.facebook.com/vlaamsbelanglokeren", "name": "Vlaams Belang Lokeren", "group": "Vlaams Belang"}, {"url": "https://www.facebook.com/VlaamsBelangMechelen", "name": "Vlaams Belang Mechelen", "group": "Vlaams Belang"}, {"url": "https://www.facebook.com/profile.php?id=100067734942218", "name": "Vlaams Belang Nieuwerkerken", "group": "Vlaams Belang"}, {"url": "https://www.facebook.com/profile.php?id=100068657822046", "name": "Vlaams Belang Oostende Verougstraete", "group": "Vlaams Belang"}, {"url": "https://www.facebook.com/profile.php?id=100087520110621", "name": "Vlaams Belang Oudenburg", "group": "Vlaams Belang"}, {"url": "https://www.facebook.com/vlaamsbelangpuurssintamands", "name": "Vlaams Belang Puurs-Sint-Amands", "group": "Vlaams Belang"}, {"url": "https://www.facebook.com/profile.php?id=100066630974847", "name": "Vlaams Belang Sint-Martens-Latem", "group": "Vlaams Belang"}, {"url": "https://www.facebook.com/profile.php?id=100069259717528", "name": "Vlaams Belang Spiere-Helkijn", "group": "Vlaams Belang"}, {"url": "https://www.facebook.com/VlaamsBelangWezembeekOppem", "name": "Vlaams Belang Wezembeek-Oppem", "group": "Vlaams Belang"}, {"url": "https://www.facebook.com/bartdewever", "name": "Bart De Wever", "group": "N-VA"}, {"url": "https://www.facebook.com/nieuwvlaamsealliantie", "name": "N-VA", "group": "N-VA"}, {"url": "https://www.facebook.com/nvabeernem", "name": "N-VA BEERNEM", "group": "N-VA"}, {"url": "https://www.facebook.com/Diepenbeek.NVA", "name": "N-VA Diepenbeek", "group": "N-VA"}, {"url": "https://www.facebook.com/nvahalle2001", "name": "N-VA Halle", "group": "N-VA"}, {"url": "https://www.facebook.com/NVaHerentals", "name": "N-VA Herentals", "group": "N-VA"}, {"url": "https://www.facebook.com/NVAieper", "name": "N-VA Ieper", "group": "N-VA"}, {"url": "https://www.facebook.com/NVAOUDHEVERLEE", "name": "N-VA Oud-Heverlee", "group": "N-VA"}, {"url": "https://www.facebook.com/profile.php?id=100068842285464", "name": "N-va Sintjoosttennode", "group": "N-VA"}, {"url": "https://www.facebook.com/zaventem.nva", "name": "N-VA Zaventem", "group": "N-VA"}, {"url": "https://www.facebook.com/profile.php?id=100069029745829", "name": "N-VA Zonhoven", "group": "N-VA"}, {"url": "https://www.facebook.com/franckentheo", "name": "Theo Francken", "group": "N-VA"}, {"url": "https://www.facebook.com/DavidClarinvalMR", "name": "David Clarinval", "group": "MR (Mouvement Réformateur)"}, {"url": "https://www.facebook.com/denisducarmeofficiel", "name": "Denis Ducarme", "group": "MR (Mouvement Réformateur)"}, {"url": "https://www.facebook.com/glbouchez", "name": "Georges-Louis Bouchez", "group": "MR (Mouvement Réformateur)"}, {"url": "https://www.facebook.com/profile.php?id=61565789757065", "name": "Jeunes Mouvement Réformateur Grâce-Hollogne", "group": "MR (Mouvement Réformateur)"}, {"url": "https://www.facebook.com/mouvementreformateur.bsa", "name": "Mouvement Reformateur Berchem SainteAgathe", "group": "MR (Mouvement Réformateur)"}, {"url": "https://www.facebook.com/profile.php?id=100068070905964", "name": "Mouvement Réformateur (page locale)", "group": "MR (Mouvement Réformateur)"}, {"url": "https://www.facebook.com/mouvementreformateuroupeye", "name": "Mouvement Réformateur d'Oupeye", "group": "MR (Mouvement Réformateur)"}, {"url": "https://www.facebook.com/profile.php?id=61551687017501", "name": "Mouvement Réformateur de Lobbes", "group": "MR (Mouvement Réformateur)"}, {"url": "https://www.facebook.com/profile.php?id=100063907455122", "name": "Mouvement Réformateur de Saint Georges sur Meuse", "group": "MR (Mouvement Réformateur)"}, {"url": "https://www.facebook.com/profile.php?id=61566442424980", "name": "Mouvement Réformateur Dison", "group": "MR (Mouvement Réformateur)"}, {"url": "https://www.facebook.com/MR.Dis", "name": "Mouvement Réformateur Dison", "group": "MR (Mouvement Réformateur)"}, {"url": "https://www.facebook.com/MRmorlanwelz", "name": "Mouvement Réformateur Morlanwelz", "group": "MR (Mouvement Réformateur)"}, {"url": "https://www.facebook.com/profile.php?id=100067507010894", "name": "Mouvement Réformateur Schaerbeek", "group": "MR (Mouvement Réformateur)"}, {"url": "https://www.facebook.com/profile.php?id=100067455750535", "name": "Mouvement Réformateur Schaerbeek", "group": "MR (Mouvement Réformateur)"}, {"url": "https://www.facebook.com/profile.php?id=100064737540177", "name": "Mouvement Réformateur Verviers", "group": "MR (Mouvement Réformateur)"}, {"url": "https://www.facebook.com/MRbe", "name": "MR - Mouvement Réformateur", "group": "MR (Mouvement Réformateur)"}, {"url": "https://www.facebook.com/MRLaHulpe", "name": "MR - Mouvement Réformateur - Section La Hulpe", "group": "MR (Mouvement Réformateur)"}, {"url": "https://www.facebook.com/mrchastre", "name": "MR - Mouvement Réformateur de Chastre", "group": "MR (Mouvement Réformateur)"}, {"url": "https://www.facebook.com/mrburdinne", "name": "MR Burdinne", "group": "MR (Mouvement Réformateur)"}, {"url": "https://www.facebook.com/MRNandrin", "name": "MR Nandrin", "group": "MR (Mouvement Réformateur)"}, {"url": "https://www.facebook.com/V.Glatigny", "name": "Valérie Glatigny", "group": "MR (Mouvement Réformateur)"}, {"url": "https://www.facebook.com/DegryseElisabeth/", "name": "Elisabeth Degryse", "group": "Les Engagés"}, {"url": "https://www.facebook.com/LesEngages.Arlon", "name": "Les Engagés - Arlon", "group": "Les Engagés"}, {"url": "https://www.facebook.com/profile.php?id=100064495611175", "name": "Les Engagés - Assesse", "group": "Les Engagés"}, {"url": "https://www.facebook.com/profile.php?id=61584930148596", "name": "Les Engagés - Bassenge", "group": "Les Engagés"}, {"url": "https://www.facebook.com/LesEngagesJodoigne", "name": "Les Engagés - Jodoigne", "group": "Les Engagés"}, {"url": "https://www.facebook.com/lesengagesliege", "name": "Les Engagés - Liège", "group": "Les Engagés"}, {"url": "https://www.facebook.com/lesengagesluxembourg", "name": "Les Engagés - Luxembourg", "group": "Les Engagés"}, {"url": "https://www.facebook.com/LesEngagesMouvementparticipatif", "name": "Les Engagés - Mouvement participatif", "group": "Les Engagés"}, {"url": "https://www.facebook.com/profile.php?id=61575876966739", "name": "Les Engagés - Section Locale de Hamoir", "group": "Les Engagés"}, {"url": "https://www.facebook.com/LesEngagesAywaille", "name": "Les Engagés Aywaille", "group": "Les Engagés"}, {"url": "https://www.facebook.com/profile.php?id=61558248817425", "name": "Les Engagés d'Oupeye", "group": "Les Engagés"}, {"url": "https://www.facebook.com/lesengagesherstal", "name": "Les Engagés Herstal", "group": "Les Engagés"}, {"url": "https://www.facebook.com/profile.php?id=61595028366904", "name": "Les Engagés Neupré", "group": "Les Engagés"}, {"url": "https://www.facebook.com/profile.php?id=100094498254100", "name": "Les engagés Seraing", "group": "Les Engagés"}, {"url": "https://www.facebook.com/maximeprevot78", "name": "Maxime Prévot", "group": "Les Engagés"}, {"url": "https://www.facebook.com/VerougstraeteYvan", "name": "Yvan Verougstraete", "group": "Les Engagés"}, {"url": "https://www.facebook.com/alexanderdecroo", "name": "Alexander De Croo", "group": "Open VLD"}, {"url": "https://www.facebook.com/profile.php?id=100066211737167", "name": "Jong open VLD Ham", "group": "Open VLD"}, {"url": "https://www.facebook.com/vldaarschot", "name": "open vld Aarschot", "group": "Open VLD"}, {"url": "https://www.facebook.com/VLDAnzegem", "name": "Open VLD Anzegem", "group": "Open VLD"}, {"url": "https://www.facebook.com/profile.php?id=100069042375398", "name": "Open Vld Berlaar", "group": "Open VLD"}, {"url": "https://www.facebook.com/openvldbilzen", "name": "Open VLD Bilzen", "group": "Open VLD"}, {"url": "https://www.facebook.com/andershulshout", "name": "Open Vld Hulshout", "group": "Open VLD"}, {"url": "https://www.facebook.com/OpenVldKortenberg", "name": "Open Vld Kortenberg", "group": "Open VLD"}, {"url": "https://www.facebook.com/OpenVldKortessem", "name": "Open Vld Kortessem", "group": "Open VLD"}, {"url": "https://www.facebook.com/profile.php?id=100069143801646", "name": "Open Vld Michelbeke", "group": "Open VLD"}, {"url": "https://www.facebook.com/profile.php?id=100069370892673", "name": "Open Vld Zedelgem", "group": "Open VLD"}, {"url": "https://www.facebook.com/lijstdedecker", "name": "Jean Marie Dedecker", "group": "Lijst Dedecker"}, {"url": "https://www.facebook.com/cheznousofficiel", "name": "Chez Nous", "group": "Chez Nous"}, {"url": "https://www.facebook.com/21NewsBe", "name": "21News", "group": "Médias (Flandre)"}, {"url": "https://www.facebook.com/BMagOfficiel", "name": "B-Mag", "group": "Médias (Flandre)"}, {"url": "https://www.facebook.com/BelgicaNews", "name": "Belgica News", "group": "Médias (Flandre)"}, {"url": "https://www.facebook.com/doorbraakbe", "name": "Doorbraak", "group": "Médias (Flandre)"}, {"url": "https://www.facebook.com/tScheldtbe", "name": "TScheldt", "group": "Médias (Flandre)"}, {"url": "https://www.facebook.com/bvoltaire.fr", "name": "Boulevard Voltaire", "group": "Médias (France)"}, {"url": "https://www.facebook.com/causeur", "name": "Causeur.fr", "group": "Médias (France)"}, {"url": "https://www.facebook.com/CNEWSofficiel", "name": "CNEWS", "group": "Médias (France)"}, {"url": "https://www.facebook.com/Europe1", "name": "Europe 1", "group": "Médias (France)"}, {"url": "https://www.facebook.com/frontieresmedia", "name": "Frontières Média", "group": "Médias (France)"}, {"url": "https://www.facebook.com/profile.php?id=61577453430190", "name": "JD News", "group": "Médias (France)"}, {"url": "https://www.facebook.com/leJDD", "name": "JDD", "group": "Médias (France)"}, {"url": "https://www.facebook.com/lincorrect", "name": "L'Incorrect", "group": "Médias (France)"}, {"url": "https://www.facebook.com/lopinionfr", "name": "l'Opinion", "group": "Médias (France)"}, {"url": "https://www.facebook.com/lefigaro", "name": "Le Figaro", "group": "Médias (France)"}, {"url": "https://www.facebook.com/lepoint.fr", "name": "Le Point", "group": "Médias (France)"}, {"url": "https://www.facebook.com/michelonfrayTV", "name": "Michel Onfray", "group": "Médias (France)"}, {"url": "https://www.facebook.com/omertamedia", "name": "Omerta Media", "group": "Médias (France)"}, {"url": "https://www.facebook.com/parismatchmag", "name": "Paris Match", "group": "Médias (France)"}, {"url": "https://www.facebook.com/parismatchbe", "name": "Paris Match Belgique", "group": "Médias (France)"}, {"url": "https://www.facebook.com/SudRadioOfficiel", "name": "Sud Radio", "group": "Médias (France)"}, {"url": "https://www.facebook.com/valeursactuelles.page", "name": "Valeurs actuelles", "group": "Médias (France)"}, {"url": "https://www.facebook.com/profile.php?id=100066403819311", "name": "Valeurs Actuelles", "group": "Médias (France)"}], groups: ["Vlaams Belang", "N-VA", "MR (Mouvement Réformateur)", "Les Engagés", "Open VLD", "Lijst Dedecker", "Chez Nous", "Médias (Flandre)", "Médias (France)"], key: 'facebook-page-list-visited-v1', container: 'groups-fb' },
-  ig: { entries: [{"url": "https://www.instagram.com/21news/", "name": "21News", "group": "Profils"}, {"url": "https://www.instagram.com/alexanderdecroo/", "name": "Alexander De Croo", "group": "Profils"}, {"url": "https://www.instagram.com/bmag/", "name": "B-Mag", "group": "Profils"}, {"url": "https://www.instagram.com/boulevardvoltaire/", "name": "Boulevard Voltaire", "group": "Profils"}, {"url": "https://www.instagram.com/bvoltaire.fr/", "name": "Boulevard Voltaire", "group": "Profils"}, {"url": "https://www.instagram.com/causeur/", "name": "Causeur.fr", "group": "Profils"}, {"url": "https://www.instagram.com/cheznousofficiel/", "name": "ChezNousOfficiel", "group": "Profils"}, {"url": "https://www.instagram.com/cnews/", "name": "CNEWS", "group": "Profils"}, {"url": "https://www.instagram.com/davidclarinval/", "name": "David Clarinval", "group": "Profils"}, {"url": "https://www.instagram.com/denisducarme/", "name": "Denis Ducarme", "group": "Profils"}, {"url": "https://www.instagram.com/doorbraakbe/", "name": "Doorbraak", "group": "Profils"}, {"url": "https://www.instagram.com/degryseelisabeth/", "name": "Elisabeth Degryse", "group": "Profils"}, {"url": "https://www.instagram.com/europe1/", "name": "Europe1", "group": "Profils"}, {"url": "https://www.instagram.com/filipdeman/", "name": "Filip Deman", "group": "Profils"}, {"url": "https://www.instagram.com/fdwvb/", "name": "Filip Dewinter", "group": "Profils"}, {"url": "https://www.instagram.com/filipdewinter/", "name": "Filip Dewinter", "group": "Profils"}, {"url": "https://www.instagram.com/frontieresmedia/", "name": "Frontières Média", "group": "Profils"}, {"url": "https://www.instagram.com/glbouchez/", "name": "Georges-Louis Bouchez", "group": "Profils"}, {"url": "https://www.instagram.com/jdd/", "name": "JDD", "group": "Profils"}, {"url": "https://www.instagram.com/jdnews/", "name": "JDNews", "group": "Profils"}, {"url": "https://www.instagram.com/jeanmariededecker/", "name": "Jean-marie De Decker", "group": "Profils"}, {"url": "https://www.instagram.com/lefigaro/", "name": "Le Figaro", "group": "Profils"}, {"url": "https://www.instagram.com/lepointfr/", "name": "Le Point", "group": "Profils"}, {"url": "https://www.instagram.com/lesengages/", "name": "Les Engagés", "group": "Profils"}, {"url": "https://www.instagram.com/lesengagesliege/", "name": "Les Engagés - Liège", "group": "Profils"}, {"url": "https://www.instagram.com/lesengagesluxembourg/", "name": "Les Engagés Luxembourg", "group": "Profils"}, {"url": "https://www.instagram.com/lincorrect/", "name": "Lin correct", "group": "Profils"}, {"url": "https://www.instagram.com/mrbe/", "name": "Mouvement Réformateur", "group": "Profils"}, {"url": "https://www.instagram.com/mrdis/", "name": "Mouvement Réformateur Dison", "group": "Profils"}, {"url": "https://www.instagram.com/mouvementreformateur/", "name": "Mouvement Réformateur | LPE", "group": "Profils"}, {"url": "https://www.instagram.com/mrlahulpe/", "name": "MR - Mouvement Réformateur - Section La Hulpe", "group": "Profils"}, {"url": "https://www.instagram.com/mrchastre/", "name": "MR - Mouvement Réformateur Chastre", "group": "Profils"}, {"url": "https://www.instagram.com/nvadiepenbeek/", "name": "N-VA Diepenbeek", "group": "Profils"}, {"url": "https://www.instagram.com/nvaherentals/", "name": "N-VA Herentals", "group": "Profils"}, {"url": "https://www.instagram.com/nvaoudheverlee/", "name": "N-VA Oud-Heverlee", "group": "Profils"}, {"url": "https://www.instagram.com/nvazaventem/", "name": "N-VA Zaventem", "group": "Profils"}, {"url": "https://www.instagram.com/nvazonhoven/", "name": "N-VA Zonhoven", "group": "Profils"}, {"url": "https://www.instagram.com/openvldaarschot/", "name": "Open VLD Aarschot", "group": "Profils"}, {"url": "https://www.instagram.com/openvldkortessem/", "name": "Open Vld Kortessem", "group": "Profils"}, {"url": "https://www.instagram.com/parismatch/", "name": "Paris Match", "group": "Profils"}, {"url": "https://www.instagram.com/parismatchbe/", "name": "Paris Match Belgique", "group": "Profils"}, {"url": "https://www.instagram.com/sudradioofficiel/", "name": "Sud Radio", "group": "Profils"}, {"url": "https://www.instagram.com/tomvandendriessche/", "name": "Tom Vandendriessche", "group": "Profils"}, {"url": "https://www.instagram.com/tomvandendriesschevb/", "name": "Tom Vandendriessche", "group": "Profils"}, {"url": "https://www.instagram.com/valeursactuelles/", "name": "Valeurs actuelles", "group": "Profils"}, {"url": "https://www.instagram.com/vglatigny/", "name": "Valérie Glatigny", "group": "Profils"}, {"url": "https://www.instagram.com/vlaamsbelang/", "name": "Vlaams Belang", "group": "Profils"}, {"url": "https://www.instagram.com/vlaamsbelangbrussel/", "name": "Vlaams Belang Brussel", "group": "Profils"}, {"url": "https://www.instagram.com/vbjabbeke/", "name": "Vlaams Belang Jabbeke", "group": "Profils"}, {"url": "https://www.instagram.com/vbjongeren/", "name": "Vlaams Belang Jongeren", "group": "Profils"}, {"url": "https://www.instagram.com/vlaamsbelanglokeren/", "name": "Vlaams Belang Lokeren", "group": "Profils"}, {"url": "https://www.instagram.com/vlaamsbelangmechelen/", "name": "Vlaams Belang Mechelen", "group": "Profils"}, {"url": "https://www.instagram.com/yvanverougstraete/", "name": "Yvan Verougstraete", "group": "Profils"}], groups: ["Profils"], key: 'instagram-page-list-visited-v1', container: 'groups-ig' },
-  x:  { entries: [{"url": "https://x.com/21news", "name": "21news", "group": "Profils"}, {"url": "https://x.com/21newsbe", "name": "21News", "group": "Profils"}, {"url": "https://x.com/alexanderdecroo", "name": "Alexander De Croo 🇺🇳", "group": "Profils"}, {"url": "https://x.com/bmagofficiel", "name": "B-Mag", "group": "Profils"}, {"url": "https://x.com/bmag", "name": "bmag", "group": "Profils"}, {"url": "https://x.com/causeur", "name": "Causeur.fr", "group": "Profils"}, {"url": "https://x.com/cnews", "name": "CNEWS", "group": "Profils"}, {"url": "https://x.com/davidclarinval", "name": "David Clarinval", "group": "Profils"}, {"url": "https://x.com/doorbraak", "name": "Doorbraak", "group": "Profils"}, {"url": "https://x.com/doorbraakbe", "name": "Doorbraak", "group": "Profils"}, {"url": "https://x.com/europe1", "name": "Europe 1", "group": "Profils"}, {"url": "https://x.com/filipdeman", "name": "Filip Deman", "group": "Profils"}, {"url": "https://x.com/frontieresmedia", "name": "Frontières", "group": "Profils"}, {"url": "https://x.com/glbouchez", "name": "Georges-L BOUCHEZ", "group": "Profils"}, {"url": "https://x.com/jdd", "name": "jdd", "group": "Profils"}, {"url": "https://x.com/lejdd", "name": "Le JDD", "group": "Profils"}, {"url": "https://x.com/lepoint", "name": "Le Point", "group": "Profils"}, {"url": "https://x.com/lepointfr", "name": "Le Point FR", "group": "Profils"}, {"url": "https://x.com/lefigaro", "name": "lefigaro", "group": "Profils"}, {"url": "https://x.com/lesengages", "name": "les engagés", "group": "Profils"}, {"url": "https://x.com/lijstdedecker", "name": "Lijst Dedecker", "group": "Profils"}, {"url": "https://x.com/michelonfraytv", "name": "Michel Onfray TV", "group": "Profils"}, {"url": "https://x.com/mrchastre", "name": "MR de Chastre", "group": "Profils"}, {"url": "https://x.com/mrlahulpe", "name": "MR Section de La Hulpe", "group": "Profils"}, {"url": "https://x.com/mrbe", "name": "MrBE", "group": "Profils"}, {"url": "https://x.com/nvahalle", "name": "N-VA Halle", "group": "Profils"}, {"url": "https://x.com/nvaieper", "name": "N-VA Ieper", "group": "Profils"}, {"url": "https://x.com/omertamedia", "name": "Omerta", "group": "Profils"}, {"url": "https://x.com/openvld", "name": "Open Vld", "group": "Profils"}, {"url": "https://x.com/openvldbilzen", "name": "Open Vld Bilzen", "group": "Profils"}, {"url": "https://x.com/parismatch", "name": "Paris Match", "group": "Profils"}, {"url": "https://x.com/parismatchbe", "name": "Paris Match Belgique", "group": "Profils"}, {"url": "https://x.com/sudradio", "name": "Sud Radio", "group": "Profils"}, {"url": "https://x.com/jdnews", "name": "The Daily News", "group": "Profils"}, {"url": "https://x.com/franckentheo", "name": "Theo Francken", "group": "Profils"}, {"url": "https://x.com/theofrancken", "name": "theo francken", "group": "Profils"}, {"url": "https://x.com/tscheldt", "name": "tScheldt", "group": "Profils"}, {"url": "https://x.com/vglatigny", "name": "Vanesa glatigny", "group": "Profils"}, {"url": "https://x.com/vlbelang", "name": "Vlaams Belang", "group": "Profils"}, {"url": "https://x.com/vbjabbeke", "name": "Vlaams Belang Jabbeke", "group": "Profils"}, {"url": "https://x.com/vbjongeren", "name": "Vlaams Belang Jongeren", "group": "Profils"}, {"url": "https://x.com/vlaamsbelang", "name": "vlaamsbelang", "group": "Profils"}], groups: ["Profils"], key: 'x-page-list-visited-v1', container: 'groups-x' }
-};
+const TAB_LABELS = { fb: 'Facebook', ig: 'Instagram', x: 'X' };
+// map platform key from json keys
+const PLATFORM_KEYS = { facebook: 'fb', instagram: 'ig', x: 'x' };
+let PAGES = null;
 let current = 'fb';
 const state = {};
-for(const k in PLATFORMS){
-  const p = PLATFORMS[k];
-  let v;
-  try { const arr = JSON.parse(localStorage.getItem(p.key) || '[]'); v = new Set(Array.isArray(arr) ? arr : []); }
-  catch { v = new Set(); }
-  state[k] = { visited: v, onlyPending: false };
+
+function deriveGroups(entries){
+  const g = [];
+  for(const e of entries){ if(!g.includes(e.group)) g.push(e.group); }
+  return g;
 }
-function save(k){ try{ localStorage.setItem(PLATFORMS[k].key, JSON.stringify([...state[k].visited])); }catch{} }
-function makeRenderer(k){
-  const p = PLATFORMS[k];
+
+function loadVisited(key){
+  try { const arr = JSON.parse(localStorage.getItem(key) || '[]'); return new Set(Array.isArray(arr) ? arr : []); }
+  catch { return new Set(); }
+}
+function saveVisited(key, set){ try{ localStorage.setItem(key, JSON.stringify([...set])); }catch{} }
+
+function buildPlatforms(pages){
+  const platforms = {};
+  for(const [jsonKey, pk] of Object.entries(PLATFORM_KEYS)){
+    const entries = pages[jsonKey] || [];
+    platforms[pk] = {
+      entries: entries,
+      groups: deriveGroups(entries),
+      key: pk + '-page-list-visited-v1',
+      container: 'groups-' + pk,
+      label: TAB_LABELS[pk]
+    };
+    state[pk] = { visited: loadVisited(platforms[pk].key), onlyPending: false };
+  }
+  return platforms;
+}
+
+let PLATFORMS = null;
+const renderers = {};
+
+function makeRenderer(pk){
+  const p = PLATFORMS[pk];
   const entries = p.entries;
   const groups = p.groups;
   const container = document.getElementById(p.container);
-  const st = state[k];
+  const st = state[pk];
   return function render(){
-    if(k !== current) return;
+    if(pk !== current) return;
     container.replaceChildren();
     let shown = 0;
     for(const g of groups){
@@ -83,7 +100,6 @@ function makeRenderer(k){
       const titleSpan = document.createElement('span');
       titleSpan.textContent = `${g} (${groupEntries.length})`;
       h2.append(indicator, titleSpan);
-      h2.style.cursor = 'pointer';
       section.appendChild(h2);
       const ol = document.createElement('ol');
       for(const e of groupEntries){
@@ -105,72 +121,95 @@ function makeRenderer(k){
         marker.addEventListener('click', (ev) => {
           ev.preventDefault(); ev.stopPropagation();
           if(st.visited.has(e.url)) st.visited.delete(e.url); else st.visited.add(e.url);
-          save(k);
+          saveVisited(p.key, st.visited);
           const now = st.visited.has(e.url);
           li.classList.toggle('visited', now);
           marker.className = 'mark ' + (now ? 'done' : 'pending');
           marker.textContent = now ? '✓' : '○';
           marker.title = now ? 'Visitée' : 'Pas encore visitée';
           marker.setAttribute('aria-label', marker.title);
-          updateCount(k, shown);
+          updateCount(pk, shown);
         });
         a.addEventListener('click', () => {
-          st.visited.add(e.url); save(k);
+          st.visited.add(e.url); saveVisited(p.key, st.visited);
           li.classList.add('visited'); marker.className = 'mark done';
           marker.textContent = '✓'; marker.title = 'Visitée'; marker.setAttribute('aria-label','Visitée');
-          updateCount(k, shown);
+          updateCount(pk, shown);
         });
         li.append(a, urlSpan, marker); ol.appendChild(li);
       }
       let collapsed = false;
-      h2.addEventListener('click', (ev) => {
+      h2.addEventListener('click', () => {
         collapsed = !collapsed;
         ol.style.display = collapsed ? 'none' : '';
         indicator.textContent = collapsed ? '▸' : '▾';
       });
       section.appendChild(ol); container.appendChild(section);
     }
-    updateCount(k, shown);
+    updateCount(pk, shown);
   };
 }
-const renderers = {};
-for(const k in PLATFORMS){ renderers[k] = makeRenderer(k); }
 
-function updateCount(k, shown){
-  const p = PLATFORMS[k];
-  const st = state[k];
+function updateCount(pk, shown){
+  if(pk !== current) return;
+  const p = PLATFORMS[pk];
+  const st = state[pk];
   const n = p.entries.filter(e => st.visited.has(e.url)).length;
-  if(k !== current) return;
-  const count = document.getElementById('count');
-  count.textContent = `${n} / ${p.entries.length} visitées` + (st.onlyPending ? ` — ${shown} non visitées affichées` : '');
+  document.getElementById('count').textContent = `${n} / ${p.entries.length} visitées` + (st.onlyPending ? ` — ${shown} non visitées affichées` : '');
 }
 
+async function init(){
+  try {
+    const res = await fetch('pages.json');
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    const pages = await res.json();
+    PLATFORMS = buildPlatforms(pages);
+    // tabs
+    const tabsEl = document.getElementById('tabs');
+    const panelsEl = document.getElementById('panels');
+    for(const pk in PLATFORMS){
+      const p = PLATFORMS[pk];
+      const btn = document.createElement('button');
+      btn.className = 'tab' + (pk === current ? ' active' : '');
+      btn.dataset.tab = pk;
+      btn.textContent = p.label;
+      tabsEl.appendChild(btn);
+      const panel = document.createElement('div');
+      panel.id = 'panel-' + pk;
+      panel.className = 'panel' + (pk === current ? ' active' : '');
+      const div = document.createElement('div');
+      div.id = p.container;
+      panel.appendChild(div);
+      panelsEl.appendChild(panel);
+    }
+    for(const pk in PLATFORMS){ renderers[pk] = makeRenderer(pk); }
+    document.querySelectorAll('.tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        current = btn.dataset.tab;
+        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+        document.getElementById('panel-' + current).classList.add('active');
+        renderCurrent();
+      });
+    });
+    document.getElementById('all').addEventListener('click',()=>{ state[current].onlyPending=false; renderCurrent(); });
+    document.getElementById('pending').addEventListener('click',()=>{ state[current].onlyPending=true; renderCurrent(); });
+    document.getElementById('reset').addEventListener('click',()=>{
+      if(confirm('Effacer tous les marqueurs enregistrés pour cet onglet ?')){ state[current].visited.clear(); saveVisited(PLATFORMS[current].key, state[current].visited); renderCurrent(); }
+    });
+    renderCurrent();
+  } catch(err) {
+    document.getElementById('panels').innerHTML = '<p class="error">Impossible de charger pages.json : ' + err.message + '. Lancez un serveur local (ex. python -m http.server) ou vérifiez le fichier.</p>';
+  }
+}
 function renderCurrent(){
-  // clear all containers
   for(const k in PLATFORMS){
     if(k !== current) document.getElementById(PLATFORMS[k].container).replaceChildren();
   }
   renderers[current]();
 }
-
-// tabs
-document.querySelectorAll('.tab').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    current = btn.dataset.tab;
-    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-    document.getElementById('panel-' + current).classList.add('active');
-    // reset onlyPending? keep
-    renderCurrent();
-  });
-});
-document.getElementById('all').addEventListener('click',()=>{ state[current].onlyPending=false; renderCurrent(); });
-document.getElementById('pending').addEventListener('click',()=>{ state[current].onlyPending=true; renderCurrent(); });
-document.getElementById('reset').addEventListener('click',()=>{
-  if(confirm('Effacer tous les marqueurs enregistrés pour cet onglet ?')){ state[current].visited.clear(); save(current); renderCurrent(); }
-});
-renderCurrent();
+init();
 </script>
 </body>
 </html>
