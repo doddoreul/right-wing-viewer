@@ -236,7 +236,6 @@ function setupDraw() {
   const card = document.getElementById('draw-card');
   const nameElement = document.getElementById('draw-name');
   const groupElement = document.getElementById('draw-group');
-  const urlElement = document.getElementById('draw-url');
   const emptyElement = document.getElementById('draw-empty');
   const visitButton = document.getElementById('draw-visit');
 
@@ -267,7 +266,6 @@ function setupDraw() {
     };
     nameElement.textContent = pick.entry.name;
     groupElement.textContent = pick.entry.group;
-    urlElement.textContent = pick.entry.url;
     card.hidden = false;
   };
 
