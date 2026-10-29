@@ -2,7 +2,7 @@
   font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
   color-scheme: light dark;
   --accent: #e07a5f;
-  --accent-text: #f4f1de;
+  --accent-text: #3d405b;
   --surface: #f4f1de;
   --surface-alt: #f2cc8f;
   --text: #3d405b;
@@ -14,7 +14,7 @@
 @media (prefers-color-scheme: dark) {
   :root {
     --accent: #e07a5f;
-    --accent-text: #f4f1de;
+    --accent-text: #3d405b;
     --surface: #3d405b;
     --surface-alt: #81b29a;
     --text: #f4f1de;

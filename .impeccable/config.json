@@ -1,0 +1,26 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "gray-on-color",
+        "value": "*",
+        "files": [
+          "style.css"
+        ],
+        "createdAt": "2026-10-29T18:30:43.286Z",
+        "reason": "brand palette: dark blue text on terracotta accent"
+      },
+      {
+        "rule": "gray-on-color",
+        "value": "*",
+        "files": [
+          "index.html"
+        ],
+        "createdAt": "2026-10-29T18:30:49.184Z",
+        "reason": "brand palette: dark blue text on terracotta accent"
+      }
+    ]
+  }
+}
